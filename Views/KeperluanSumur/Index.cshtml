@@ -1,0 +1,44 @@
+@model IEnumerable<InventoryManagement.Models.KeperluanSumur>
+
+@{
+    ViewData["Title"] = "Keperluan Sumur";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<a href="/KeperluanSumur/Create" class="btn btn-primary mb-3">Tambah Keperluan Sumur</a>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID Sumur</th>
+            <th>Nama Sumur</th>
+            <th>Material</th>
+            <th>Jumlah</th>
+            <th>Aksi</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var group in Model.GroupBy(ks => ks.IdSumur))
+        {
+            bool firstRow = true;
+            @foreach (var material in group)
+            {
+                <tr>
+                    @if (firstRow)
+                    {
+                        <td rowspan="@group.Count()">@material.Sumur.IdSumur</td>
+                        <td rowspan="@group.Count()">@material.Sumur.NamaSumur</td>
+                        firstRow = false;
+                    }
+                    <td>@material.DeskripsiMaterial</td>
+                    <td>@material.Jumlah</td>
+                    <td>
+                        <a class="btn btn-warning btn-sm" href="/KeperluanSumur/Edit/@material.IdKeperluans">Edit</a>
+                        <a class="btn btn-danger btn-sm" href="/KeperluanSumur/Delete/@material.IdKeperluans">Hapus</a>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

@@ -1,0 +1,70 @@
+﻿@{
+    ViewData["Title"] = "Dashboard Inventory Sumur";
+}
+
+<div class="container mt-4">
+    <h1 class="mb-4">Dashboard Inventory Sumur</h1>
+
+    <table class="table table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th>CODE</th>
+                <th>DESKRIPSI</th>
+                <th>REMARK</th>
+                <th>JAN</th>
+                <th>FEB</th>
+                <th>MAR</th>
+                <th>APR</th>
+                <th>MEI</th>
+                <th>JUN</th>
+                <th>JUL</th>
+                <th>AUG</th>
+                <th>SEP</th>
+                <th>OCT</th>
+                <th>NOV</th>
+                <th>DEC</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in ViewBag.DetailInventory)
+            {
+                <tr>
+                    <td>@item.KodeMaterial</td>
+                    <td>@item.DeskripsiMaterial</td>
+                    <td>JUMLAH SUMUR</td>
+                    @foreach (var bulan in new[] { "JAN", "FEB", "MAR", "APR", "MEI", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC" })
+                    {
+                        <td>@(item.JumlahSumur.ContainsKey(bulan) ? item.JumlahSumur[bulan] : 0)</td>
+                    }
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td>KEBUTUHAN</td>
+                    @foreach (var bulan in new[] { "JAN", "FEB", "MAR", "APR", "MEI", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC" })
+                    {
+                        <td>@(item.Kebutuhan.ContainsKey(bulan) ? item.Kebutuhan[bulan] : 0)</td>
+                    }
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td>STOK</td>
+                    @foreach (var bulan in new[] { "JAN", "FEB", "MAR", "APR", "MEI", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC" })
+                    {
+                        <td>@(item.Stok.ContainsKey(bulan) ? item.Stok[bulan] : 0)</td>
+                    }
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td>BALANCE</td>
+                    @foreach (var bulan in new[] { "JAN", "FEB", "MAR", "APR", "MEI", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC" })
+                    {
+                        <td>@(item.Balance.ContainsKey(bulan) ? item.Balance[bulan] : 0)</td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

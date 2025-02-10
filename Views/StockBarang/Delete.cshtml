@@ -1,0 +1,15 @@
+@model InventoryManagement.Models.StockBarang
+
+@{
+    ViewData["Title"] = "Hapus Stock Barang";
+}
+
+<div class="container mt-4">
+    <h1>Hapus Stock Barang</h1>
+    <p>Apakah Anda yakin ingin menghapus barang dengan kode material: <strong>@Model.KodeMaterial</strong>?</p>
+
+    <form method="post">
+        <button type="submit" class="btn btn-danger">Hapus</button>
+        <a href="/StockBarang" class="btn btn-secondary">Batal</a>
+    </form>
+</div>

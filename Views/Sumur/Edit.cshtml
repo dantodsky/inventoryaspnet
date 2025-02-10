@@ -1,0 +1,25 @@
+@model InventoryManagement.Models.Sumur
+
+@{
+    ViewData["Title"] = "Edit Sumur";
+}
+
+<div class="container mt-4">
+    <h1>Edit Sumur</h1>
+    <form method="post">
+        <input type="hidden" name="IdSumur" value="@Model.IdSumur" />
+        <div class="form-group">
+            <label>Daerah Sumur</label>
+            <input type="text" name="DaerahSumur" value="@Model.DaerahSumur" class="form-control" required />
+        </div>
+        <div class="form-group">
+            <label>Nama Sumur</label>
+            <input type="text" name="NamaSumur" value="@Model.NamaSumur" class="form-control" required />
+        </div>
+        <div class="form-group">
+            <label>Tanggal Mulai</label>
+            <input type="date" name="StartDate" value="@Model.StartDate.ToString("yyyy-MM-dd")" class="form-control" required />
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Simpan</button>
+    </form>
+</div>

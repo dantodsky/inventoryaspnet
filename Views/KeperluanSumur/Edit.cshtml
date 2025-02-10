@@ -1,0 +1,29 @@
+@model InventoryManagement.Models.KeperluanSumur
+
+<h2>Edit Jumlah Material</h2>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+<form asp-action="EditJumlah" asp-controller="KeperluanSumur" method="post">
+    <input type="hidden" name="IdKeperluans" value="@Model.IdKeperluans">
+
+    <div class="form-group">
+        <label>Material:</label>
+        <input type="text" class="form-control" value="@Model.DeskripsiMaterial" disabled>
+    </div>
+
+    <div class="form-group">
+        <label>Jumlah:</label>
+        <input type="number" class="form-control" name="Jumlah" value="@Model.Jumlah" min="1" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update</button>
+</form>

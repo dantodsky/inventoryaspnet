@@ -1,0 +1,36 @@
+@model InventoryManagement.Models.StockBarang
+
+@{
+    ViewData["Title"] = "Tambah Stock Barang";
+}
+
+<div class="container mt-4">
+    <h1>Tambah Stock Barang</h1>
+    <form method="post">
+        <div class="form-group">
+            <label>Kode Gudang</label>
+            <input type="text" name="KodeGudang" class="form-control" required />
+        </div>
+        <div class="form-group">
+            <label>Kode Material</label>
+            <input type="text" name="KodeMaterial" class="form-control" required />
+        </div>
+        <div class="form-group">
+            <label>Deskripsi Material</label>
+            <input type="text" name="DeskripsiMaterial" class="form-control" required />
+        </div>
+        <div class="form-group">
+            <label>Base Unit</label>
+            <input type="text" name="BaseUnit" class="form-control" required />
+        </div>
+        <div class="form-group">
+            <label>Jumlah</label>
+            <input type="number" name="Jumlah" class="form-control" required />
+        </div>
+        <div class="form-group">
+            <label>Harga Per Unit</label>
+            <input type="number" name="HargaPerUnit" class="form-control" required />
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Simpan</button>
+    </form>
+</div>

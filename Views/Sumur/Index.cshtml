@@ -1,0 +1,38 @@
+@model IEnumerable<InventoryManagement.Models.Sumur>
+
+@{
+    ViewData["Title"] = "Daftar Sumur";
+}
+
+<div class="container mt-4">
+    <h1>Daftar Sumur</h1>
+
+    <a class="btn btn-primary mb-3" href="/Sumur/Create">Tambah Sumur</a>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Daerah</th>
+                <th>Nama Sumur</th>
+                <th>Tanggal Mulai</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.IdSumur</td>
+                    <td>@item.DaerahSumur</td>
+                    <td>@item.NamaSumur</td>
+                    <td>@item.StartDate.ToString("dd MMMM yyyy")</td>
+                    <td>
+                        <a class="btn btn-warning btn-sm" href="/Sumur/Edit/@item.IdSumur">Edit</a>
+                        <a class="btn btn-danger btn-sm" href="/Sumur/Delete/@item.IdSumur">Hapus</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

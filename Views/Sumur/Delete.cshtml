@@ -1,0 +1,24 @@
+@model InventoryManagement.Models.Sumur
+
+@{
+    ViewData["Title"] = "Hapus Sumur";
+}
+
+<div class="container mt-4">
+    <h1>Hapus Sumur</h1>
+    <p>Apakah Anda yakin ingin menghapus data sumur berikut?</p>
+
+    <dl class="row">
+        <dt class="col-sm-3">Daerah Sumur</dt>
+        <dd class="col-sm-9">@Model.DaerahSumur</dd>
+        <dt class="col-sm-3">Nama Sumur</dt>
+        <dd class="col-sm-9">@Model.NamaSumur</dd>
+        <dt class="col-sm-3">Tanggal Mulai</dt>
+        <dd class="col-sm-9">@Model.StartDate.ToString("dd MMMM yyyy")</dd>
+    </dl>
+
+    <form method="post">
+        <button type="submit" class="btn btn-danger">Hapus</button>
+        <a class="btn btn-secondary" href="/Sumur">Batal</a>
+    </form>
+</div>

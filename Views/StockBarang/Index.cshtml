@@ -1,0 +1,46 @@
+@model IEnumerable<InventoryManagement.Models.StockBarang>
+
+@{
+    ViewData["Title"] = "Stock Barang";
+}
+
+<div class="container mt-4">
+    <h1>Stock Barang</h1>
+
+    <a class="btn btn-primary mb-3" href="/StockBarang/Create">Tambah Barang</a>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Kode Gudang</th>
+                <th>Kode Material</th>
+                <th>Deskripsi</th>
+                <th>Unit</th>
+                <th>Jumlah</th>
+                <th>Harga Per Unit</th>
+                <th>Total Harga</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.IdBarang</td>
+                    <td>@item.KodeGudang</td>
+                    <td>@item.KodeMaterial</td>
+                    <td>@item.DeskripsiMaterial</td>
+                    <td>@item.BaseUnit</td>
+                    <td>@item.Jumlah</td>
+                    <td>@string.Format(new System.Globalization.CultureInfo("id-ID"), "Rp {0:N0}", item.HargaPerUnit)</td>
+                    <td>@string.Format(new System.Globalization.CultureInfo("id-ID"), "Rp {0:N0}", item.TotalHargaBarang)</td>
+                    <td>
+                        <a class="btn btn-warning btn-sm" href="/StockBarang/Edit/@item.IdBarang">Edit</a>
+                        <a class="btn btn-danger btn-sm" href="/StockBarang/Delete/@item.IdBarang">Hapus</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

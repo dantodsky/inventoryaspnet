@@ -1,0 +1,28 @@
+@model InventoryManagement.Models.KeperluanSumur
+
+@{
+    ViewData["Title"] = "Hapus Keperluan Sumur";
+}
+
+<h1>@ViewData["Title"]</h1>
+<p>Apakah Anda yakin ingin menghapus keperluan sumur ini?</p>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Nama Sumur</th>
+        <td>@Model.Sumur.NamaSumur</td>
+    </tr>
+    <tr>
+        <th>Material</th>
+        <td>@Model.DeskripsiMaterial</td>
+    </tr>
+    <tr>
+        <th>Jumlah</th>
+        <td>@Model.Jumlah</td>
+    </tr>
+</table>
+
+<form method="post">
+    <button type="submit" class="btn btn-danger">Hapus</button>
+    <a href="/KeperluanSumur" class="btn btn-secondary">Batal</a>
+</form>
