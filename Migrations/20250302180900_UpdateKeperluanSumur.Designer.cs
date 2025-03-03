@@ -4,6 +4,7 @@ using InventoryManagement.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace InventoryManagement.Migrations
 {
     [DbContext(typeof(InventoryContext))]
-    partial class InventoryContextModelSnapshot : ModelSnapshot
+    [Migration("20250302180900_UpdateKeperluanSumur")]
+    partial class UpdateKeperluanSumur
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -57,7 +60,7 @@ namespace InventoryManagement.Migrations
 
                     b.HasIndex("KodeMaterial");
 
-                    b.ToTable("KeperluanSumurs", (string)null);
+                    b.ToTable("KeperluanSumurs");
                 });
 
             modelBuilder.Entity("InventoryManagement.Models.StockBarang", b =>
@@ -92,7 +95,7 @@ namespace InventoryManagement.Migrations
 
                     b.HasKey("IdBarang");
 
-                    b.ToTable("StockBarangs", (string)null);
+                    b.ToTable("StockBarangs");
                 });
 
             modelBuilder.Entity("InventoryManagement.Models.StockHistory", b =>
@@ -126,7 +129,7 @@ namespace InventoryManagement.Migrations
 
                     b.HasIndex("KodeMaterial");
 
-                    b.ToTable("StockHistories", (string)null);
+                    b.ToTable("StockHistories");
                 });
 
             modelBuilder.Entity("InventoryManagement.Models.Sumur", b =>
@@ -150,7 +153,7 @@ namespace InventoryManagement.Migrations
 
                     b.HasKey("IdSumur");
 
-                    b.ToTable("Sumurs", (string)null);
+                    b.ToTable("Sumurs");
                 });
 
             modelBuilder.Entity("InventoryManagement.Models.KeperluanSumur", b =>

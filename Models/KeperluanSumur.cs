@@ -18,6 +18,9 @@ namespace InventoryManagement.Models
         [StringLength(50, ErrorMessage = "Kode Material tidak boleh lebih dari 50 karakter.")]
         public string KodeMaterial { get; set; } = string.Empty;
 
+        [ForeignKey("KodeMaterial")]
+        public StockBarang? StockBarang { get; set; }  // **Tambahkan Properti Navigasi**
+
         [Required(ErrorMessage = "Deskripsi Material harus diisi.")]
         [StringLength(100, ErrorMessage = "Deskripsi Material tidak boleh lebih dari 100 karakter.")]
         public string DeskripsiMaterial { get; set; } = string.Empty;
@@ -29,5 +32,9 @@ namespace InventoryManagement.Models
         [Required(ErrorMessage = "Jumlah harus diisi.")]
         [Range(1, int.MaxValue, ErrorMessage = "Jumlah harus lebih dari 0.")]
         public int Jumlah { get; set; }
+
+        // **Tambahkan Properti untuk Menyimpan Kekurangan Stok**
+        [NotMapped]  // Tidak disimpan di database, hanya untuk tampilan
+        public int Kekurangan { get; set; } = 0;
     }
 }

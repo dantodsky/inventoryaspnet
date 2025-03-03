@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using InventoryManagement.Data;
 using InventoryManagement.Models;
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace InventoryManagement.Controllers
 {
@@ -17,29 +17,29 @@ namespace InventoryManagement.Controllers
             _context = context;
         }
 
-        // **READ: Tampilkan daftar keperluan sumur**
-        public IActionResult Index()
+        // ✅ 1️⃣ Tampilkan daftar keperluan sumur
+        public async Task<IActionResult> Index()
         {
-            var keperluanSumurs = _context.KeperluanSumurs
-                .Include(ks => ks.Sumur) // Relasi ke tabel Sumur
-                .OrderBy(ks => ks.IdSumur) // Urutkan berdasarkan IdSumur
-                .ToList();
+            var keperluanSumurs = await _context.KeperluanSumurs
+                .Include(k => k.Sumur)
+                .Include(k => k.StockBarang)
+                .ToListAsync();
 
             return View(keperluanSumurs);
         }
 
-        // **CREATE: Form tambah keperluan sumur**
+        // ✅ 2️⃣ CREATE: Form tambah keperluan sumur
         public IActionResult Create()
         {
-            ViewData["Sumurs"] = _context.Sumurs.ToList(); // Dropdown untuk Sumur
-            ViewData["StockBarangs"] = _context.StockBarangs.ToList(); // Dropdown untuk Stock Barang
+            ViewData["Sumurs"] = _context.Sumurs.ToList();
+            ViewData["StockBarangs"] = _context.StockBarangs.ToList();
 
-            return View(new List<KeperluanSumur>()); // List kosong untuk multiple material
+            return View(new List<KeperluanSumur> { new KeperluanSumur() });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(List<KeperluanSumur> keperluanSumurs)
+        public async Task<IActionResult> Create(List<KeperluanSumur> keperluanSumurs)
         {
             if (keperluanSumurs == null || !keperluanSumurs.Any())
             {
@@ -50,8 +50,8 @@ namespace InventoryManagement.Controllers
             try
             {
                 int idSumur = keperluanSumurs.First().IdSumur;
+                var sumur = await _context.Sumurs.FindAsync(idSumur);
 
-                var sumur = _context.Sumurs.Find(idSumur);
                 if (sumur == null)
                 {
                     TempData["ErrorMessage"] = "Sumur tidak ditemukan.";
@@ -60,6 +60,12 @@ namespace InventoryManagement.Controllers
 
                 foreach (var keperluanSumur in keperluanSumurs)
                 {
+                    if (keperluanSumur.KodeMaterial == null || keperluanSumur.Jumlah <= 0)
+                    {
+                        TempData["ErrorMessage"] = "Pastikan semua data telah diisi dengan benar.";
+                        return RedirectToAction(nameof(Create));
+                    }
+
                     var stock = _context.StockBarangs.FirstOrDefault(sb => sb.KodeMaterial == keperluanSumur.KodeMaterial);
                     if (stock == null)
                     {
@@ -67,103 +73,80 @@ namespace InventoryManagement.Controllers
                         return RedirectToAction(nameof(Create));
                     }
 
-                    if (stock.Jumlah < keperluanSumur.Jumlah)
-                    {
-                        TempData["ErrorMessage"] = $"Stok untuk {stock.DeskripsiMaterial} tidak mencukupi.";
-                        return RedirectToAction(nameof(Create));
-                    }
+                    int stokDapatDigunakan = Math.Min(stock.Jumlah, keperluanSumur.Jumlah);
+                    int kekurangan = keperluanSumur.Jumlah - stokDapatDigunakan;
+                    stock.Jumlah -= stokDapatDigunakan;
 
-                    stock.Jumlah -= keperluanSumur.Jumlah;
                     keperluanSumur.DeskripsiMaterial = stock.DeskripsiMaterial;
                     keperluanSumur.BaseUnit = stock.BaseUnit;
+                    keperluanSumur.Kekurangan = kekurangan;
 
                     _context.KeperluanSumurs.Add(keperluanSumur);
                 }
 
-                _context.SaveChanges();
-                TempData["SuccessMessage"] = "Keperluan sumur berhasil ditambahkan dan stok telah diperbarui!";
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Keperluan sumur berhasil ditambahkan!";
                 return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex)
+            catch
             {
-                TempData["ErrorMessage"] = $"Kesalahan: {ex.Message}";
+                TempData["ErrorMessage"] = "Terjadi kesalahan saat menambahkan data.";
             }
 
-            ViewData["Sumurs"] = _context.Sumurs.ToList();
-            ViewData["StockBarangs"] = _context.StockBarangs.ToList();
-            return View(keperluanSumurs);
+            return RedirectToAction(nameof(Create));
         }
 
-        // **EDIT: Form edit keperluan sumur**
-        public IActionResult Edit(int id)
+        // ✅ 3️⃣ EDIT: Form edit keperluan sumur
+        public async Task<IActionResult> Edit(int id)
         {
-            var keperluanSumur = _context.KeperluanSumurs
-                .AsNoTracking()
-                .FirstOrDefault(ks => ks.IdKeperluans == id);
-
+            var keperluanSumur = await _context.KeperluanSumurs.FindAsync(id);
             if (keperluanSumur == null)
             {
                 TempData["ErrorMessage"] = "Keperluan sumur tidak ditemukan.";
                 return RedirectToAction(nameof(Index));
             }
 
+            ViewData["Sumurs"] = _context.Sumurs.ToList();
+            ViewData["StockBarangs"] = _context.StockBarangs.ToList();
             return View(keperluanSumur);
         }
 
-        // **EDIT (POST): Update hanya jumlah material**
         [HttpPost]
-[ValidateAntiForgeryToken]
-public IActionResult EditJumlah(KeperluanSumur updatedData)
-{
-    try
-    {
-        var keperluanSumur = _context.KeperluanSumurs.FirstOrDefault(ks => ks.IdKeperluans == updatedData.IdKeperluans);
-        if (keperluanSumur == null)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, KeperluanSumur keperluanSumur)
         {
-            TempData["ErrorMessage"] = "Keperluan sumur tidak ditemukan.";
-            return RedirectToAction(nameof(Index));
+            if (id != keperluanSumur.IdKeperluans)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(keperluanSumur);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Data keperluan sumur berhasil diperbarui!";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch
+                {
+                    TempData["ErrorMessage"] = "Terjadi kesalahan saat menyimpan data.";
+                }
+            }
+
+            ViewData["Sumurs"] = _context.Sumurs.ToList();
+            ViewData["StockBarangs"] = _context.StockBarangs.ToList();
+            return View(keperluanSumur);
         }
 
-        var stock = _context.StockBarangs.FirstOrDefault(sb => sb.KodeMaterial == keperluanSumur.KodeMaterial);
-        if (stock == null)
+        // ✅ 4️⃣ DELETE: Konfirmasi hapus keperluan sumur
+        public async Task<IActionResult> Delete(int id)
         {
-            TempData["ErrorMessage"] = "Material tidak ditemukan di stok.";
-            return RedirectToAction(nameof(Edit), new { id = updatedData.IdKeperluans });
-        }
-
-        // Kembalikan stok lama sebelum update
-        stock.Jumlah += keperluanSumur.Jumlah;
-
-        // Validasi jumlah baru tidak melebihi stok yang tersedia
-        if (updatedData.Jumlah > stock.Jumlah)
-        {
-            TempData["ErrorMessage"] = $"Stok untuk {stock.DeskripsiMaterial} tidak mencukupi.";
-            return RedirectToAction(nameof(Edit), new { id = updatedData.IdKeperluans });
-        }
-
-        // Update jumlah dan kurangi stok
-        keperluanSumur.Jumlah = updatedData.Jumlah;
-        stock.Jumlah -= updatedData.Jumlah;
-
-        _context.SaveChanges();
-
-        TempData["SuccessMessage"] = "Jumlah material berhasil diperbarui.";
-        return RedirectToAction(nameof(Index));
-    }
-    catch (Exception ex)
-    {
-        TempData["ErrorMessage"] = $"Kesalahan: {ex.Message}";
-        return RedirectToAction(nameof(Index));
-    }
-}
-
-
-        // **DELETE: Konfirmasi hapus keperluan sumur**
-        public IActionResult Delete(int id)
-        {
-            var keperluanSumur = _context.KeperluanSumurs
-                .Include(ks => ks.Sumur)
-                .FirstOrDefault(ks => ks.IdKeperluans == id);
+            var keperluanSumur = await _context.KeperluanSumurs
+                .Include(k => k.Sumur)
+                .Include(k => k.StockBarang)
+                .FirstOrDefaultAsync(k => k.IdKeperluans == id);
 
             if (keperluanSumur == null)
             {
@@ -175,37 +158,42 @@ public IActionResult EditJumlah(KeperluanSumur updatedData)
         }
 
         [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(int id)
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> DeleteConfirmed(int id)
+{
+    var keperluanSumur = await _context.KeperluanSumurs.FindAsync(id);
+
+    if (keperluanSumur != null)
+    {
+        try
         {
-            var keperluanSumur = _context.KeperluanSumurs.Find(id);
-
-            if (keperluanSumur != null)
+            // **1️⃣ Ambil stok barang terkait**
+            var stock = await _context.StockBarangs.FirstOrDefaultAsync(sb => sb.KodeMaterial == keperluanSumur.KodeMaterial);
+            
+            if (stock != null)
             {
-                try
-                {
-                    var stock = _context.StockBarangs.FirstOrDefault(sb => sb.KodeMaterial == keperluanSumur.KodeMaterial);
-                    if (stock != null)
-                    {
-                        stock.Jumlah += keperluanSumur.Jumlah;
-                    }
-
-                    _context.KeperluanSumurs.Remove(keperluanSumur);
-                    _context.SaveChanges();
-
-                    TempData["SuccessMessage"] = "Keperluan sumur berhasil dihapus dan stok telah dikembalikan!";
-                }
-                catch (Exception ex)
-                {
-                    TempData["ErrorMessage"] = $"Kesalahan: {ex.Message}";
-                }
-            }
-            else
-            {
-                TempData["ErrorMessage"] = "Keperluan sumur tidak ditemukan.";
+                // **2️⃣ Kembalikan stok yang dikurangi**
+                int stokDikembalikan = keperluanSumur.Jumlah - keperluanSumur.Kekurangan;
+                stock.Jumlah += stokDikembalikan;
             }
 
-            return RedirectToAction(nameof(Index));
+            // **3️⃣ Hapus keperluan sumur**
+            _context.KeperluanSumurs.Remove(keperluanSumur);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Keperluan sumur berhasil dihapus dan stok telah dikembalikan!";
         }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = $"Kesalahan: {ex.Message}";
+        }
+    }
+    else
+    {
+        TempData["ErrorMessage"] = "Keperluan sumur tidak ditemukan.";
+    }
+
+    return RedirectToAction(nameof(Index));
+}
     }
 }

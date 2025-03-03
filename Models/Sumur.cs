@@ -1,5 +1,7 @@
-using System.ComponentModel.DataAnnotations;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace InventoryManagement.Models
 {
@@ -8,16 +10,20 @@ namespace InventoryManagement.Models
         [Key]
         public int IdSumur { get; set; }
 
-        [Required]
-        public string DaerahSumur { get; set; }
-
-        [Required]
+        [Required(ErrorMessage = "Nama Sumur wajib diisi")]
+        [StringLength(255)]
         public string NamaSumur { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Tanggal Mulai wajib diisi")]
         public DateTime StartDate { get; set; }
 
-        // Relasi ke KeperluanSumur
-        public List<KeperluanSumur>? KeperluanSumurs { get; set; }
+        // **Foreign Key ke Areas**
+        [Required(ErrorMessage = "Pilih Daerah Sumur")]
+        public int IdAreas { get; set; }
+
+        [ForeignKey("IdAreas")]
+        public Areas? Area { get; set; } // ✅ Jadikan nullable agar tidak divalidasi
+
+        public ICollection<KeperluanSumur>? KeperluanSumurs { get; set; }
     }
 }

@@ -1,0 +1,33 @@
+@model IEnumerable<InventoryManagement.Models.Areas>
+
+@{
+    ViewData["Title"] = "Daftar Area";
+}
+
+<div class="container mt-4">
+    <h1>Daftar Area</h1>
+    <a class="btn btn-primary mb-3" href="/Areas/Create">Tambah Area</a>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nama Area</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var area in Model)
+            {
+                <tr>
+                    <td>@area.IdAreas</td>
+                    <td>@area.NamaArea</td>
+                    <td>
+                        <a class="btn btn-warning btn-sm" href="/Areas/Edit/@area.IdAreas">Edit</a>
+                        <a class="btn btn-danger btn-sm" href="/Areas/Delete/@area.IdAreas">Hapus</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

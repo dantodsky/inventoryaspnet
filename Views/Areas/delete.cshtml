@@ -1,0 +1,20 @@
+@model InventoryManagement.Models.Areas
+
+@{
+    ViewData["Title"] = "Hapus Area";
+}
+
+<div class="container mt-4">
+    <h1>Hapus Area</h1>
+    <p>Apakah Anda yakin ingin menghapus area berikut?</p>
+
+    <dl class="row">
+        <dt class="col-sm-3">Nama Area</dt>
+        <dd class="col-sm-9">@Model.NamaArea</dd>
+    </dl>
+
+    <form method="post">
+        <button type="submit" class="btn btn-danger">Hapus</button>
+        <a class="btn btn-secondary" href="/Areas">Batal</a>
+    </form>
+</div>

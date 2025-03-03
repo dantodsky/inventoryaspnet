@@ -4,20 +4,22 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Konfigurasi koneksi ke MySQL
+// **1️⃣ Konfigurasi koneksi ke MySQL**
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
 builder.Services.AddDbContext<InventoryContext>(options =>
     options.UseMySql(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        new MySqlServerVersion(new Version(8, 0, 26)) // Sesuaikan dengan versi MySQL Anda
+        connectionString,
+        new MySqlServerVersion(new Version(8, 0, 26)) // Sesuaikan dengan versi MySQL/MariaDB
     ));
 
-// 2. Tambahkan layanan MVC + JSON case-insensitive
+// **2️⃣ Tambahkan layanan MVC + JSON case-insensitive**
 builder.Services.AddControllersWithViews().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
 });
 
-// 3. (Opsional) Aktifkan CORS
+// **3️⃣ (Opsional) Aktifkan CORS**
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
@@ -28,26 +30,46 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// 4. Middleware
+// **4️⃣ Middleware Error Handling**
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+else
+{
+    app.UseDeveloperExceptionPage();
+}
 
+// **5️⃣ Middleware umum**
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-
-// 5. Aktifkan CORS sebelum Authorization (Opsional)
 app.UseCors("AllowAll");
-
 app.UseAuthorization();
 
-// 6. Routing
+// **6️⃣ Tambahkan Route untuk Dashboard, Sumur, dan Areas**
+app.MapControllerRoute(
+    name: "dashboard_sumur",
+    pattern: "HomeSumur/{action=Index}/{id?}",
+    defaults: new { controller = "HomeSumur" });
+
+app.MapControllerRoute(
+    name: "areas",
+    pattern: "Areas/{action=Index}/{id?}",
+    defaults: new { controller = "Areas" });
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// 7. Jalankan aplikasi
+// **7️⃣ Pastikan Database diupdate saat aplikasi mulai**
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<InventoryContext>();
+    context.Database.Migrate(); // ✅ Pastikan migrasi berjalan otomatis saat aplikasi pertama kali dijalankan
+}
+
+// **8️⃣ Jalankan aplikasi**
 app.Run();

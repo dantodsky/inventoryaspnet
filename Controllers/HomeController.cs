@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using InventoryManagement.Data;
 using InventoryManagement.Models;
 using System;
-using System.Linq;
-using System.Globalization;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace InventoryManagement.Controllers
 {
@@ -19,63 +19,86 @@ namespace InventoryManagement.Controllers
 
         public IActionResult Index()
         {
-            // Dictionary konversi bulan dari angka ke format "JAN", "FEB", dst.
-            var months = new Dictionary<int, string>
+            // **Ambil semua data**
+            var keperluanSumurs = _context.KeperluanSumurs.Include(k => k.Sumur).ToList();
+            var stockHistories = _context.StockHistories.ToList();
+            var stockBarangs = _context.StockBarangs.ToList();
+
+            // **Dictionary untuk menyimpan data per material**
+            var inventoryDetail = new Dictionary<string, dynamic>();
+
+            foreach (var material in stockBarangs)
             {
-                { 1, "JAN" }, { 2, "FEB" }, { 3, "MAR" }, { 4, "APR" }, { 5, "MEI" },
-                { 6, "JUN" }, { 7, "JUL" }, { 8, "AUG" }, { 9, "SEP" }, { 10, "OCT" },
-                { 11, "NOV" }, { 12, "DEC" }
-            };
+                var materialCode = material.KodeMaterial;
+                var materialName = material.DeskripsiMaterial;
 
-            // Ambil data dari database
-            var rawData = _context.KeperluanSumurs
-                .Join(_context.Sumurs, ks => ks.IdSumur, s => s.IdSumur, (ks, s) => new
+                // **Inisialisasi per bulan**
+                var jumlahSumur = new Dictionary<string, int>();
+                var kebutuhan = new Dictionary<string, int>();
+                var stok = new Dictionary<string, int>();
+                var balance = new Dictionary<string, int>();
+
+                foreach (var bulan in new[] { "JAN", "FEB", "MAR", "APR", "MEI", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC" })
                 {
-                    ks.KodeMaterial,
-                    ks.DeskripsiMaterial,
-                    Bulan = months[s.StartDate.Month], // Konversi angka bulan ke format JAN, FEB, dst.
-                    TotalKebutuhan = ks.Jumlah
-                })
-                .ToList();
+                    jumlahSumur[bulan] = 0;
+                    kebutuhan[bulan] = 0;
+                    stok[bulan] = 0;
+                    balance[bulan] = 0;
+                }
 
-            var detailInventory = rawData
-                .GroupBy(km => new { km.KodeMaterial, km.DeskripsiMaterial })
-                .Select(g =>
+                // **Hitung jumlah sumur dan kebutuhan material per bulan**
+                foreach (var keperluan in keperluanSumurs.Where(k => k.KodeMaterial == materialCode))
                 {
-                    var stokAwal = _context.StockBarangs
-                        .Where(sb => sb.KodeMaterial == g.Key.KodeMaterial)
-                        .Select(sb => sb.Jumlah)
-                        .FirstOrDefault();
-
-                    // Pastikan semua bulan memiliki nilai default 0
-                    var jumlahSumur = months.Values.ToDictionary(m => m, m => g.Where(k => k.Bulan == m).Count());
-                    var kebutuhan = months.Values.ToDictionary(m => m, m => g.Where(k => k.Bulan == m).Sum(k => k.TotalKebutuhan));
-                    var stok = new Dictionary<string, int>();
-                    var balance = new Dictionary<string, int>();
-
-                    // Inisialisasi stok dan balance
-                    int stokSebelumnya = stokAwal;
-
-                    foreach (var bulan in months.Values)
+                    if (keperluan.Sumur != null)
                     {
-                        stok[bulan] = stokSebelumnya;
-                        balance[bulan] = stokSebelumnya - kebutuhan[bulan];
-                        stokSebelumnya = balance[bulan]; // Update stok untuk bulan berikutnya
+                        string bulan = keperluan.Sumur.StartDate.ToString("MMM").ToUpper();
+                        if (jumlahSumur.ContainsKey(bulan)) jumlahSumur[bulan]++;
+                        if (kebutuhan.ContainsKey(bulan)) kebutuhan[bulan] += keperluan.Jumlah;
                     }
+                }
 
-                    return new
-                    {
-                        KodeMaterial = g.Key.KodeMaterial,
-                        DeskripsiMaterial = g.Key.DeskripsiMaterial,
-                        JumlahSumur = jumlahSumur,
-                        Kebutuhan = kebutuhan,
-                        Stok = stok,
-                        Balance = balance
-                    };
-                })
-                .ToList();
+                // **Ambil stok awal dari histori terakhir**
+                int stokAwal = stockHistories
+                    .Where(s => s.KodeMaterial == materialCode)
+                    .OrderByDescending(s => s.TanggalTransaksi)
+                    .Select(s => s.Balance)
+                    .FirstOrDefault();
 
-            ViewBag.DetailInventory = detailInventory;
+                if (stokAwal == 0) stokAwal = material.Jumlah; // Jika tidak ada histori, pakai jumlah di StockBarang
+
+                int lastBalance = stokAwal;
+
+                foreach (var bulan in new[] { "JAN", "FEB", "MAR", "APR", "MEI", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC" })
+                {
+                    // **Ambil histori stok pada bulan tersebut**
+                    var stockEntry = stockHistories
+                        .Where(s => s.KodeMaterial == materialCode && s.TanggalTransaksi.ToString("MMM").ToUpper() == bulan)
+                        .OrderBy(s => s.TanggalTransaksi)
+                        .ToList();
+
+                    stok[bulan] = stockEntry.Any() ? stockEntry.Last().Balance : lastBalance;
+
+                    // **Kurangi stok berdasarkan kebutuhan sumur bulan itu**
+                    lastBalance = stok[bulan] - kebutuhan[bulan];
+
+                    balance[bulan] = lastBalance;
+                }
+
+                // **Masukkan data ke dictionary**
+                inventoryDetail[materialCode] = new
+                {
+                    KodeMaterial = materialCode,
+                    DeskripsiMaterial = materialName,
+                    JumlahSumur = jumlahSumur,
+                    Kebutuhan = kebutuhan,
+                    Stok = stok,
+                    Balance = balance
+                };
+            }
+
+            // **Kirim data ke View**
+            ViewBag.DetailInventory = inventoryDetail.Values.ToList();
+
             return View();
         }
     }

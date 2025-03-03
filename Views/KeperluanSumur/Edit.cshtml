@@ -1,29 +1,51 @@
 @model InventoryManagement.Models.KeperluanSumur
 
-<h2>Edit Jumlah Material</h2>
-
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+@{
+    ViewData["Title"] = "Edit Keperluan Sumur";
+    var sumurs = ViewData["Sumurs"] as IEnumerable<InventoryManagement.Models.Sumur>;
+    var stockBarangs = ViewData["StockBarangs"] as IEnumerable<InventoryManagement.Models.StockBarang>;
 }
 
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
-}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">Edit Keperluan Sumur</div>
+        <div class="card-body">
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+            }
 
-<form asp-action="EditJumlah" asp-controller="KeperluanSumur" method="post">
-    <input type="hidden" name="IdKeperluans" value="@Model.IdKeperluans">
+            <form method="post">
+                <input type="hidden" asp-for="IdKeperluans" />
 
-    <div class="form-group">
-        <label>Material:</label>
-        <input type="text" class="form-control" value="@Model.DeskripsiMaterial" disabled>
+                <div class="form-group">
+                    <label>Pilih Sumur</label>
+                    <select asp-for="IdSumur" class="form-control" required>
+                        @foreach (var sumur in sumurs)
+                        {
+                            <option value="@sumur.IdSumur">@sumur.NamaSumur</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Pilih Material</label>
+                    <select asp-for="KodeMaterial" class="form-control" required>
+                        @foreach (var stock in stockBarangs)
+                        {
+                            <option value="@stock.KodeMaterial">@stock.KodeMaterial - @stock.DeskripsiMaterial</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Jumlah</label>
+                    <input type="number" asp-for="Jumlah" class="form-control" required />
+                </div>
+
+                <button type="submit" class="btn btn-primary mt-3">Simpan</button>
+                <a class="btn btn-secondary mt-3" href="/KeperluanSumur">Batal</a>
+            </form>
+        </div>
     </div>
-
-    <div class="form-group">
-        <label>Jumlah:</label>
-        <input type="number" class="form-control" name="Jumlah" value="@Model.Jumlah" min="1" required>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Update</button>
-</form>
+</div>

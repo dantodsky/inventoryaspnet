@@ -1,0 +1,35 @@
+@model InventoryManagement.Models.StockHistory
+
+@{
+    ViewData["Title"] = "Tambah Histori Stok";
+}
+
+<div class="container mt-4">
+    <h1 class="mb-4">Tambah Histori Stok</h1>
+
+    <form asp-action="Create" method="post">
+        <div class="form-group">
+            <label for="KodeMaterial">Kode Material</label>
+            <select asp-for="KodeMaterial" class="form-control" required>
+                <option value="">-- Pilih Material --</option>
+                @foreach (var item in ViewData["Materials"] as List<InventoryManagement.Models.StockBarang>)
+                {
+                    <option value="@item.KodeMaterial">@item.KodeMaterial - @item.DeskripsiMaterial</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="TanggalTransaksi">Tanggal Transaksi</label>
+            <input asp-for="TanggalTransaksi" type="date" class="form-control" required />
+        </div>
+
+        <div class="form-group">
+            <label for="BarangMasuk">Barang Masuk</label>
+            <input asp-for="BarangMasuk" type="number" class="form-control" required />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Simpan</button>
+        <a asp-action="Index" class="btn btn-secondary">Batal</a>
+    </form>
+</div>

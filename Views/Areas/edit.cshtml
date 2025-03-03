@@ -1,0 +1,19 @@
+@model InventoryManagement.Models.Areas
+
+@{
+    ViewData["Title"] = "Edit Area";
+}
+
+<div class="container mt-4">
+    <h1>Edit Area</h1>
+    <form method="post">
+        <input type="hidden" name="IdAreas" value="@Model.IdAreas" />
+        <div class="form-group">
+            <label>Nama Area</label>
+            <input type="text" name="NamaArea" value="@Model.NamaArea" class="form-control" required />
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Simpan</button>
+        <a class="btn btn-secondary" href="/Areas">Batal</a>
+    </form>
+</div>

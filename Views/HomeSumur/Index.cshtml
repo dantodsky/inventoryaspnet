@@ -1,0 +1,48 @@
+@{
+    ViewData["Title"] = "Dashboard Keperluan Sumur";
+}
+
+<div class="container mt-4">
+    <h1 class="mb-3">Dashboard Keperluan Sumur</h1>
+
+    <table class="table table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th>Daerah Sumur</th>
+                <th>Nama Sumur</th>
+                <th>Tanggal Mulai</th>
+                <th>Overall Status</th>
+                <th>Material</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var sumur in ViewBag.SumurData)
+            {
+                <tr>
+                    <td>@sumur.NamaArea</td>
+                    <td>@sumur.NamaSumur</td>
+                    <td>@sumur.StartDate</td>
+                    <td>
+                        <span class="badge @(sumur.OverallStatus == 100 ? "bg-success" : "bg-danger")">
+                            @sumur.OverallStatus%
+                        </span>
+                    </td>
+                    <td>
+                        <ul class="list-unstyled">
+                            @foreach (var material in sumur.MaterialDetails)
+                            {
+                                <li>
+                                    @material.NamaMaterial: 
+                                    <span class="badge @(material.Kekurangan > 0 ? "bg-danger" : "bg-success")">
+                                        @material.Kebutuhan 
+                                        @(material.Kekurangan > 0 ? $"(Kurang {material.Kekurangan})" : "")
+                                    </span>
+                                </li>
+                            }
+                        </ul>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -2,24 +2,43 @@
 
 @{
     ViewData["Title"] = "Edit Sumur";
+    var areas = ViewData["Areas"] as IEnumerable<InventoryManagement.Models.Areas>;
 }
 
 <div class="container mt-4">
     <h1>Edit Sumur</h1>
     <form method="post">
         <input type="hidden" name="IdSumur" value="@Model.IdSumur" />
+
+        <!-- Pilih Area -->
         <div class="form-group">
             <label>Daerah Sumur</label>
-            <input type="text" name="DaerahSumur" value="@Model.DaerahSumur" class="form-control" required />
+            <select name="IdAreas" class="form-control" required>
+                <option value="">-- Pilih Area --</option>
+                @foreach (var area in areas)
+                {
+                    if (Model.IdAreas == area.IdAreas)
+                    {
+                        <option value="@area.IdAreas" selected="selected">@area.NamaArea</option>
+                    }
+                    else
+                    {
+                        <option value="@area.IdAreas">@area.NamaArea</option>
+                    }
+                }
+            </select>
         </div>
+
         <div class="form-group">
             <label>Nama Sumur</label>
             <input type="text" name="NamaSumur" value="@Model.NamaSumur" class="form-control" required />
         </div>
+
         <div class="form-group">
             <label>Tanggal Mulai</label>
             <input type="date" name="StartDate" value="@Model.StartDate.ToString("yyyy-MM-dd")" class="form-control" required />
         </div>
+
         <button type="submit" class="btn btn-primary mt-3">Simpan</button>
     </form>
 </div>

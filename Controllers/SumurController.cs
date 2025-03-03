@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using InventoryManagement.Data;
 using InventoryManagement.Models;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace InventoryManagement.Controllers
 {
@@ -14,67 +16,121 @@ namespace InventoryManagement.Controllers
             _context = context;
         }
 
-        // READ: Tampilkan daftar sumur
-        public IActionResult Index()
+        // **1️⃣ READ: Tampilkan daftar sumur**
+        public async Task<IActionResult> Index()
         {
-            var sumurs = _context.Sumurs.ToList();
+            var sumurs = await _context.Sumurs
+                .Include(s => s.Area) // ✅ Include Area agar NamaArea bisa diakses
+                .ToListAsync();
             return View(sumurs);
         }
 
-        // CREATE: Form tambah sumur
+        // **2️⃣ CREATE: Form tambah sumur**
         public IActionResult Create()
         {
+            ViewData["Areas"] = _context.Areas.ToList(); // ✅ Kirim daftar Area ke dropdown
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(Sumur sumur)
+        public async Task<IActionResult> Create([Bind("NamaSumur, StartDate, IdAreas")] Sumur sumur)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                TempData["ErrorMessage"] = "Validasi gagal: " + string.Join("; ", errors);
+                ViewData["Areas"] = _context.Areas.ToList();
+                return View(sumur);
+            }
+
+            try
+            {
+                // **Cek apakah Area valid**
+                var area = await _context.Areas.FindAsync(sumur.IdAreas);
+                if (area == null)
+                {
+                    TempData["ErrorMessage"] = "Error: Area tidak ditemukan di database.";
+                    ViewData["Areas"] = _context.Areas.ToList();
+                    return View(sumur);
+                }
+
                 _context.Sumurs.Add(sumur);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
 
                 TempData["SuccessMessage"] = "Data sumur berhasil ditambahkan!";
                 return RedirectToAction(nameof(Index));
             }
-            TempData["ErrorMessage"] = "Terjadi kesalahan saat menambahkan data sumur.";
-            return View(sumur);
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Gagal menambahkan sumur: " + ex.Message;
+                ViewData["Areas"] = _context.Areas.ToList();
+                return View(sumur);
+            }
         }
 
-        // UPDATE: Form edit sumur
-        public IActionResult Edit(int id)
+        // **3️⃣ UPDATE: Form edit sumur**
+        public async Task<IActionResult> Edit(int id)
         {
-            var sumur = _context.Sumurs.FirstOrDefault(s => s.IdSumur == id);
+            var sumur = await _context.Sumurs.FindAsync(id);
             if (sumur == null)
             {
                 TempData["ErrorMessage"] = "Data sumur tidak ditemukan.";
                 return RedirectToAction(nameof(Index));
             }
+
+            ViewData["Areas"] = _context.Areas.ToList(); // ✅ Kirim daftar Area ke dropdown
             return View(sumur);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(Sumur sumur)
+        public async Task<IActionResult> Edit(int id, [Bind("IdSumur, NamaSumur, StartDate, IdAreas")] Sumur sumur)
         {
-            if (ModelState.IsValid)
+            if (id != sumur.IdSumur)
             {
-                _context.Sumurs.Update(sumur);
-                _context.SaveChanges();
+                return NotFound();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                TempData["ErrorMessage"] = "Validasi gagal: " + string.Join("; ", errors);
+                ViewData["Areas"] = _context.Areas.ToList();
+                return View(sumur);
+            }
+
+            try
+            {
+                // **Cek apakah Area valid**
+                var area = await _context.Areas.FindAsync(sumur.IdAreas);
+                if (area == null)
+                {
+                    TempData["ErrorMessage"] = "Error: Area tidak ditemukan di database.";
+                    ViewData["Areas"] = _context.Areas.ToList();
+                    return View(sumur);
+                }
+
+                _context.Update(sumur);
+                await _context.SaveChangesAsync();
 
                 TempData["SuccessMessage"] = "Data sumur berhasil diperbarui!";
                 return RedirectToAction(nameof(Index));
             }
-            TempData["ErrorMessage"] = "Terjadi kesalahan saat memperbarui data sumur.";
-            return View(sumur);
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Gagal memperbarui sumur: " + ex.Message;
+                ViewData["Areas"] = _context.Areas.ToList();
+                return View(sumur);
+            }
         }
 
-        // DELETE: Konfirmasi penghapusan sumur
-        public IActionResult Delete(int id)
+        // **4️⃣ DELETE: Konfirmasi penghapusan sumur**
+        public async Task<IActionResult> Delete(int id)
         {
-            var sumur = _context.Sumurs.FirstOrDefault(s => s.IdSumur == id);
+            var sumur = await _context.Sumurs
+                .Include(s => s.Area)
+                .FirstOrDefaultAsync(s => s.IdSumur == id);
             if (sumur == null)
             {
                 TempData["ErrorMessage"] = "Data sumur tidak ditemukan.";
@@ -85,14 +141,13 @@ namespace InventoryManagement.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var sumur = _context.Sumurs.FirstOrDefault(s => s.IdSumur == id);
+            var sumur = await _context.Sumurs.FindAsync(id);
             if (sumur != null)
             {
                 _context.Sumurs.Remove(sumur);
-                _context.SaveChanges();
-
+                await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Data sumur berhasil dihapus!";
             }
             else

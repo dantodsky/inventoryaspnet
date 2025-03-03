@@ -169,3 +169,4 @@ C:\Users\Dansss\InventoryManagement\obj\Debug\net9.0\refint\InventoryManagement.
 C:\Users\Dansss\InventoryManagement\obj\Debug\net9.0\InventoryManagement.pdb
 C:\Users\Dansss\InventoryManagement\obj\Debug\net9.0\InventoryManagement.genruntimeconfig.cache
 C:\Users\Dansss\InventoryManagement\obj\Debug\net9.0\ref\InventoryManagement.dll
+C:\Users\Dansss\InventoryManagement\obj\Debug\net9.0\InventoryManagement.sourcelink.json

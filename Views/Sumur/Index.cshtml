@@ -20,16 +20,16 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in Model)
+            @foreach (var sumur in Model)
             {
                 <tr>
-                    <td>@item.IdSumur</td>
-                    <td>@item.DaerahSumur</td>
-                    <td>@item.NamaSumur</td>
-                    <td>@item.StartDate.ToString("dd MMMM yyyy")</td>
+                    <td>@sumur.IdSumur</td>
+                    <td>@sumur.Area?.NamaArea</td> <!-- ✅ Menampilkan NamaArea -->
+                    <td>@sumur.NamaSumur</td>
+                    <td>@sumur.StartDate.ToString("dd MMMM yyyy")</td>
                     <td>
-                        <a class="btn btn-warning btn-sm" href="/Sumur/Edit/@item.IdSumur">Edit</a>
-                        <a class="btn btn-danger btn-sm" href="/Sumur/Delete/@item.IdSumur">Hapus</a>
+                        <a class="btn btn-warning btn-sm" href="/Sumur/Edit/@sumur.IdSumur">Edit</a>
+                        <a class="btn btn-danger btn-sm" href="/Sumur/Delete/@sumur.IdSumur">Hapus</a>
                     </td>
                 </tr>
             }

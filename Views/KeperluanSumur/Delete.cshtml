@@ -4,25 +4,27 @@
     ViewData["Title"] = "Hapus Keperluan Sumur";
 }
 
-<h1>@ViewData["Title"]</h1>
-<p>Apakah Anda yakin ingin menghapus keperluan sumur ini?</p>
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-danger text-white">Hapus Keperluan Sumur</div>
+        <div class="card-body">
+            <p>Apakah Anda yakin ingin menghapus keperluan sumur berikut?</p>
 
-<table class="table table-bordered">
-    <tr>
-        <th>Nama Sumur</th>
-        <td>@Model.Sumur.NamaSumur</td>
-    </tr>
-    <tr>
-        <th>Material</th>
-        <td>@Model.DeskripsiMaterial</td>
-    </tr>
-    <tr>
-        <th>Jumlah</th>
-        <td>@Model.Jumlah</td>
-    </tr>
-</table>
+            <dl class="row">
+                <dt class="col-sm-3">Sumur</dt>
+                <dd class="col-sm-9">@Model.Sumur.NamaSumur</dd>
 
-<form method="post">
-    <button type="submit" class="btn btn-danger">Hapus</button>
-    <a href="/KeperluanSumur" class="btn btn-secondary">Batal</a>
-</form>
+                <dt class="col-sm-3">Material</dt>
+                <dd class="col-sm-9">@Model.KodeMaterial - @Model.DeskripsiMaterial</dd>
+
+                <dt class="col-sm-3">Jumlah</dt>
+                <dd class="col-sm-9">@Model.Jumlah</dd>
+            </dl>
+
+            <form method="post">
+                <button type="submit" class="btn btn-danger">Hapus</button>
+                <a class="btn btn-secondary" href="/KeperluanSumur">Batal</a>
+            </form>
+        </div>
+    </div>
+</div>
