@@ -12,7 +12,8 @@ namespace InventoryManagement.Data
         public DbSet<KeperluanSumur> KeperluanSumurs { get; set; }
         public DbSet<StockBarang> StockBarangs { get; set; }
         public DbSet<StockHistory> StockHistories { get; set; }
-        public DbSet<Areas> Areas { get; set; } // ✅ Tambahkan DbSet untuk Areas
+        public DbSet<KeperluanHistory> KeperluanHistories { get; set; }
+        public DbSet<Areas> Areas { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -20,19 +21,19 @@ namespace InventoryManagement.Data
 
             // ✅ **Relasi Sumur -> Areas (One-to-Many)**
             modelBuilder.Entity<Sumur>()
-                .HasOne(s => s.Area)   // Properti navigasi di Sumur
-                .WithMany(a => a.Sumurs) // Relasi ke Areas
+                .HasOne(s => s.Area)
+                .WithMany(a => a.Sumurs)
                 .HasForeignKey(s => s.IdAreas)
-                .OnDelete(DeleteBehavior.Restrict); // Jangan hapus otomatis jika area dihapus
+                .OnDelete(DeleteBehavior.Restrict);
 
             // ✅ **Relasi Sumur -> KeperluanSumur (One-to-Many)**
             modelBuilder.Entity<KeperluanSumur>()
                 .HasOne(ks => ks.Sumur)
-                .WithMany(s => s.KeperluanSumurs)
+                .WithMany(s => s.KeperluanSumurs) // **Gunakan KeperluanSumurs, bukan KeperluanHistories**
                 .HasForeignKey(ks => ks.IdSumur)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // ✅ **Relasi KeperluanSumur -> StockBarang (Berdasarkan KodeMaterial)**
+            // ✅ **Relasi KeperluanSumur -> StockBarang (One-to-Many, Berdasarkan KodeMaterial)**
             modelBuilder.Entity<KeperluanSumur>()
                 .HasOne(ks => ks.StockBarang) 
                 .WithMany()
@@ -47,6 +48,23 @@ namespace InventoryManagement.Data
                 .HasForeignKey(sh => sh.KodeMaterial)
                 .HasPrincipalKey(sb => sb.KodeMaterial)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // ✅ **Relasi KeperluanHistories -> KeperluanSumur, Sumur, dan StockBarang**
+            modelBuilder.Entity<KeperluanHistory>()
+                .HasOne(kh => kh.KeperluanSumur)
+                .WithMany()
+                .HasForeignKey(kh => kh.IdKeperluans);
+
+            modelBuilder.Entity<KeperluanHistory>()
+                .HasOne(kh => kh.Sumur)
+                .WithMany()
+                .HasForeignKey(kh => kh.IdSumur);
+
+            modelBuilder.Entity<KeperluanHistory>()
+                .HasOne(kh => kh.StockBarang)
+                .WithMany()
+                .HasForeignKey(kh => kh.KodeMaterial)
+                .HasPrincipalKey(sb => sb.KodeMaterial);
         }
     }
 }

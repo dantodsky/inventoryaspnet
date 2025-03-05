@@ -1,0 +1,30 @@
+@model IEnumerable<InventoryManagement.Models.KeperluanHistory>
+
+@{
+    ViewData["Title"] = "Histori Pengeluaran Material";
+}
+
+<h2>Histori Pengeluaran Material</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Sumur</th>
+            <th>Material</th>
+            <th>Tanggal</th>
+            <th>Jumlah Keluar</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@(item.Sumur?.NamaSumur ?? "Tidak Diketahui")</td>  <!-- ✅ Gunakan NamaSumur -->
+                <td>@(item.StockBarang?.DeskripsiMaterial ?? "Tidak Diketahui")</td>  <!-- ✅ Gunakan DeskripsiMaterial -->
+                <td>@item.Tanggal.ToString("dd/MM/yyyy")</td>
+                <td>@item.JumlahKeluar</td>
+            </tr>
+        }
+    </tbody>
+</table>
+d

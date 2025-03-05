@@ -12,18 +12,19 @@ namespace InventoryManagement.Models
 
         [Required(ErrorMessage = "Nama Sumur wajib diisi")]
         [StringLength(255)]
-        public string NamaSumur { get; set; }
+        public string NamaSumur { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Tanggal Mulai wajib diisi")]
         public DateTime StartDate { get; set; }
 
         // **Foreign Key ke Areas**
-        [Required(ErrorMessage = "Pilih Daerah Sumur")]
+        [Required(ErrorMessage = "Daerah Sumur wajib dipilih")]
         public int IdAreas { get; set; }
 
         [ForeignKey("IdAreas")]
-        public Areas? Area { get; set; } // ✅ Jadikan nullable agar tidak divalidasi
+        public Areas? Area { get; set; }
 
+        // ✅ Hubungan dengan KeperluanSumur (Bukan KeperluanHistories)
         public ICollection<KeperluanSumur>? KeperluanSumurs { get; set; }
     }
 }

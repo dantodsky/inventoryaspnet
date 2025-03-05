@@ -6,15 +6,19 @@
 
 <h1>@ViewData["Title"]</h1>
 
-<a href="/KeperluanSumur/Create" class="btn btn-primary mb-3">Tambah Keperluan Sumur</a>
+<a href="@Url.Action("Create", "KeperluanSumur")" class="btn btn-primary mb-3">
+    <i class="fas fa-plus"></i> Tambah Keperluan Sumur
+</a>
 
 <table class="table table-bordered">
-    <thead>
+    <thead class="thead-dark">
         <tr>
             <th>ID Sumur</th>
             <th>Nama Sumur</th>
             <th>Material</th>
             <th>Jumlah</th>
+            <th>Stok Tersedia</th>
+            <th>Kekurangan</th>
             <th>Aksi</th>
         </tr>
     </thead>
@@ -24,18 +28,39 @@
             bool firstRow = true;
             @foreach (var material in group)
             {
+                // ✅ Hitung stok tersedia dari StockHistories
+                var totalBarangMasuk = material.StockBarang?.StockHistories?.Sum(sh => sh.BarangMasuk) ?? 0;
+                var totalBarangKeluar = material.StockBarang?.KeperluanHistories?.Sum(kh => kh.JumlahKeluar) ?? 0;
+                var stokTersedia = totalBarangMasuk - totalBarangKeluar;
+                var kekurangan = material.Jumlah - stokTersedia > 0 ? material.Jumlah - stokTersedia : 0;
+
                 <tr>
                     @if (firstRow)
                     {
-                        <td rowspan="@group.Count()">@material.Sumur.IdSumur</td>
-                        <td rowspan="@group.Count()">@material.Sumur.NamaSumur</td>
+                        <td rowspan="@group.Count()">@material.Sumur?.IdSumur</td>
+                        <td rowspan="@group.Count()">@material.Sumur?.NamaSumur</td>
                         firstRow = false;
                     }
                     <td>@material.DeskripsiMaterial</td>
                     <td>@material.Jumlah</td>
+                    <td>@stokTersedia</td>
+                    <td class="@(kekurangan > 0 ? "text-danger font-weight-bold" : "")">
+                        @if (kekurangan > 0)
+                        {
+                            <span>@kekurangan (Kurang!)</span>
+                        }
+                        else
+                        {
+                            <span>-</span>
+                        }
+                    </td>
                     <td>
-                        <a class="btn btn-warning btn-sm" href="/KeperluanSumur/Edit/@material.IdKeperluans">Edit</a>
-                        <a class="btn btn-danger btn-sm" href="/KeperluanSumur/Delete/@material.IdKeperluans">Hapus</a>
+                        <a class="btn btn-warning btn-sm" href="@Url.Action("Edit", "KeperluanSumur", new { id = material.IdKeperluans })">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <a class="btn btn-danger btn-sm" href="@Url.Action("Delete", "KeperluanSumur", new { id = material.IdKeperluans })">
+                            <i class="fas fa-trash"></i> Hapus
+                        </a>
                     </td>
                 </tr>
             }

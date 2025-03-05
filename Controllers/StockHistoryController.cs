@@ -40,26 +40,21 @@ namespace InventoryManagement.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Ambil stok awal dari histori terakhir atau dari StockBarangs
+                // **Ambil stok awal dari histori terakhir**
                 var lastRecord = _context.StockHistories
                     .Where(s => s.KodeMaterial == stockHistory.KodeMaterial)
                     .OrderByDescending(s => s.TanggalTransaksi)
                     .FirstOrDefault();
 
-                int stokAwal = lastRecord != null ? lastRecord.Balance : _context.StockBarangs
-                    .Where(sb => sb.KodeMaterial == stockHistory.KodeMaterial)
-                    .Select(sb => sb.Jumlah)
-                    .FirstOrDefault();
+                int stokAwal = lastRecord != null ? lastRecord.Balance : 0;
 
-                // **Hanya menambah stok, tidak ada pengurangan di sini**
+                // **Tambahkan stok di StockHistory**
                 stockHistory.StokAwal = stokAwal;
-                stockHistory.Balance = stokAwal + stockHistory.BarangMasuk;
+                stockHistory.Balance = stokAwal + stockHistory.BarangMasuk - stockHistory.BarangKeluar;
+                stockHistory.TanggalTransaksi = DateTime.Now; // Pastikan tanggal sekarang
 
                 _context.StockHistories.Add(stockHistory);
                 _context.SaveChanges();
-
-                // **Tambahkan stok di StockBarangs**
-                UpdateStockBarangs(stockHistory.KodeMaterial, stockHistory.Balance);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -84,11 +79,20 @@ namespace InventoryManagement.Controllers
 
             if (ModelState.IsValid)
             {
+                // **Perbarui data histori stok**
+                var lastRecord = _context.StockHistories
+                    .Where(s => s.KodeMaterial == stockHistory.KodeMaterial)
+                    .OrderByDescending(s => s.TanggalTransaksi)
+                    .FirstOrDefault();
+
+                int stokAwal = lastRecord != null ? lastRecord.Balance : 0;
+
+                stockHistory.StokAwal = stokAwal;
+                stockHistory.Balance = stokAwal + stockHistory.BarangMasuk - stockHistory.BarangKeluar;
+                stockHistory.TanggalTransaksi = DateTime.Now;
+
                 _context.StockHistories.Update(stockHistory);
                 _context.SaveChanges();
-
-                // **Update jumlah di StockBarangs**
-                UpdateStockBarangs(stockHistory.KodeMaterial, stockHistory.Balance);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -113,29 +117,8 @@ namespace InventoryManagement.Controllers
             {
                 _context.StockHistories.Remove(stockHistory);
                 _context.SaveChanges();
-
-                // **Update ulang stok di StockBarangs berdasarkan histori terbaru**
-                var lastRecord = _context.StockHistories
-                    .Where(s => s.KodeMaterial == stockHistory.KodeMaterial)
-                    .OrderByDescending(s => s.TanggalTransaksi)
-                    .FirstOrDefault();
-
-                int newBalance = lastRecord != null ? lastRecord.Balance : 0;
-                UpdateStockBarangs(stockHistory.KodeMaterial, newBalance);
             }
             return RedirectToAction(nameof(Index));
-        }
-
-        // **METHOD: Update Stok di StockBarangs setelah transaksi**
-        private void UpdateStockBarangs(string kodeMaterial, int balance)
-        {
-            var stockBarang = _context.StockBarangs.FirstOrDefault(sb => sb.KodeMaterial == kodeMaterial);
-            if (stockBarang != null)
-            {
-                stockBarang.Jumlah = balance;
-                _context.StockBarangs.Update(stockBarang);
-                _context.SaveChanges();
-            }
         }
     }
 }

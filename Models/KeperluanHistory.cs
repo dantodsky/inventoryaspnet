@@ -1,12 +1,19 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace InventoryManagement.Models
 {
-    public class KeperluanSumur
+    public class KeperluanHistory
     {
         [Key]
+        public int Id { get; set; }
+
+        [Required]
         public int IdKeperluans { get; set; }
+
+        [ForeignKey("IdKeperluans")]
+        public KeperluanSumur? KeperluanSumur { get; set; }
 
         [Required]
         public int IdSumur { get; set; }
@@ -19,17 +26,12 @@ namespace InventoryManagement.Models
         public string KodeMaterial { get; set; } = string.Empty;
 
         [ForeignKey("KodeMaterial")]
-        public StockBarang? StockBarang { get; set; } // **✅ Pastikan relasi ini benar!**
+        public StockBarang? StockBarang { get; set; }
 
         [Required]
-        [StringLength(100)]
-        public string DeskripsiMaterial { get; set; } = string.Empty;
+        public DateTime Tanggal { get; set; }
 
         [Required]
-        [StringLength(20)]
-        public string BaseUnit { get; set; } = string.Empty;
-
-        [Required]
-        public int Jumlah { get; set; }
+        public int JumlahKeluar { get; set; }
     }
 }

@@ -41,6 +41,7 @@
             <div class="sidebar">
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                        
                         <!-- Dashboard -->
                         <li class="nav-item">
                             <a href="@Url.Action("Index", "Home")" class="nav-link">
@@ -49,28 +50,54 @@
                             </a>
                         </li>
 
-                        <!-- Dashboard Sumur -->
-                        <li class="nav-item">
-                            <a href="@Url.Action("Index", "HomeSumur")" class="nav-link">
+                        <!-- Manajemen Barang (Dropdown Menu) -->
+                        <li class="nav-item has-treeview">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-boxes"></i>
+                                <p>
+                                    Manajemen Barang
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="@Url.Action("Index", "StockBarang")" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Stock Barang</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="@Url.Action("Index", "StockHistory")" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Stock History</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <!-- Manajemen Sumur (Dropdown Menu) -->
+                        <li class="nav-item has-treeview">
+                            <a href="#" class="nav-link">
                                 <i class="nav-icon fas fa-water"></i>
-                                <p>Dashboard Sumur</p>
+                                <p>
+                                    Manajemen Sumur
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
                             </a>
-                        </li>
-
-                        <!-- Stock Barang -->
-                        <li class="nav-item">
-                            <a href="@Url.Action("Index", "StockBarang")" class="nav-link">
-                                <i class="nav-icon fas fa-box"></i>
-                                <p>Stock Barang</p>
-                            </a>
-                        </li>
-
-                        <!-- Keperluan Sumur -->
-                        <li class="nav-item">
-                            <a href="@Url.Action("Index", "KeperluanSumur")" class="nav-link">
-                                <i class="nav-icon fas fa-tasks"></i>
-                                <p>Keperluan Sumur</p>
-                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="@Url.Action("Index", "Sumur")" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Data Sumur</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="@Url.Action("Index", "KeperluanSumur")" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Keperluan Sumur</p>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
 
                         <!-- Areas (Daerah) -->
@@ -98,7 +125,6 @@
             </div>
             <section class="content">
                 <div class="container-fluid">
-                    <!-- Render Body -->
                     @RenderBody()
                 </div>
             </section>
@@ -129,20 +155,24 @@
             <text>toastr.error('@TempData["ErrorMessage"]');</text>
         }
 
-        // Pengaturan Toastr (opsional)
-        toastr.options = {
-            "closeButton": true,
-            "progressBar": true,
-            "positionClass": "toast-top-right",
-            "timeOut": "5000",
-            "extendedTimeOut": "1000",
-            "showMethod": "fadeIn",
-            "hideMethod": "fadeOut"
-        };
+        // Aktifkan sidebar dropdown di AdminLTE
+        $('.nav-item.has-treeview > a').click(function (e) {
+            e.preventDefault();
+            $(this).next('.nav-treeview').slideToggle();
+            $(this).parent().toggleClass('menu-open');
+        });
+
+        // Tandai menu aktif berdasarkan URL saat ini
+        var url = window.location.href;
+        $('.nav-link').each(function () {
+            if (this.href === url) {
+                $(this).addClass('active');
+                $(this).closest('.nav-item').addClass('menu-open');
+            }
+        });
     });
     </script>
 
-    <!-- Section untuk tambahan script -->
     @RenderSection("Scripts", required: false)
 </body>
 </html>

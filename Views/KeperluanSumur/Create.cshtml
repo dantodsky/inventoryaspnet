@@ -15,7 +15,7 @@
                 <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
             }
 
-            <form method="post">
+            <form asp-action="Create" method="post">
                 <div class="form-group">
                     <label>Pilih Sumur</label>
                     <select id="sumurSelect" class="form-control" required>
@@ -27,10 +27,10 @@
                     </select>
                 </div>
 
+                <input type="hidden" id="IdSumurInput" name="keperluanSumurs[0].IdSumur" />
+
                 <div id="materials-container">
                     <div class="material-entry">
-                        <input type="hidden" name="keperluanSumurs[0].IdSumur" class="sumur-id-input" />
-                        
                         <label>Pilih Material</label>
                         <select name="keperluanSumurs[0].KodeMaterial" class="form-control" required>
                             <option value="">-- Pilih Material --</option>
@@ -57,21 +57,17 @@
 <script>
     let materialIndex = 0;
 
-    document.getElementById('sumurSelect').addEventListener('change', (e) => {
-        const sumurId = e.target.value;
-        document.querySelectorAll('.sumur-id-input').forEach(input => {
-            input.value = sumurId;
-        });
+    document.getElementById('sumurSelect').addEventListener('change', function () {
+        document.getElementById('IdSumurInput').value = this.value;
     });
 
-    document.getElementById('add-material').addEventListener('click', () => {
+    document.getElementById('add-material').addEventListener('click', function () {
         materialIndex++;
         const container = document.getElementById('materials-container');
         const newMaterial = container.querySelector('.material-entry').cloneNode(true);
 
         newMaterial.querySelector('select').name = `keperluanSumurs[${materialIndex}].KodeMaterial`;
         newMaterial.querySelector('input[type="number"]').name = `keperluanSumurs[${materialIndex}].Jumlah`;
-        newMaterial.querySelector('.sumur-id-input').name = `keperluanSumurs[${materialIndex}].IdSumur`;
 
         container.appendChild(newMaterial);
 

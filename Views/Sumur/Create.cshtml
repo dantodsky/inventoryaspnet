@@ -2,51 +2,59 @@
 
 @{
     ViewData["Title"] = "Tambah Sumur";
-    var areas = ViewData["Areas"] as IEnumerable<InventoryManagement.Models.Areas>;
 }
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Tambah Sumur</h4>
-                </div>
-                <div class="card-body">
-                    @if (TempData["ErrorMessage"] != null)
+<h1>@ViewData["Title"]</h1>
+
+<form asp-action="Create" method="post">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4>Tambah Sumur</h4>
+        </div>
+        <div class="card-body">
+            <!-- Error Message -->
+            @if (ViewData.ModelState.Any(x => x.Value.Errors.Count > 0))
+            {
+                <div class="alert alert-danger">
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
                     {
-                        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+                        <p>@error.ErrorMessage</p>
                     }
-
-                    <form method="post">
-                        <div class="form-group">
-                            <label>Nama Sumur</label>
-                            <input type="text" name="NamaSumur" class="form-control" required />
-                        </div>
-
-                        <div class="form-group">
-                            <label>Daerah Sumur</label>
-                            <select name="IdAreas" class="form-control" required>
-                                <option value="">-- Pilih Area --</option>
-                                @foreach (var area in areas)
-                                {
-                                    <option value="@area.IdAreas">@area.NamaArea</option>
-                                }
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Tanggal Mulai</label>
-                            <input type="date" name="StartDate" class="form-control" required />
-                        </div>
-
-                        <div class="d-flex justify-content-between mt-3">
-                            <a class="btn btn-secondary" href="/Sumur">Batal</a>
-                            <button type="submit" class="btn btn-primary">Simpan</button>
-                        </div>
-                    </form>
                 </div>
+            }
+
+            <!-- Nama Sumur -->
+            <div class="form-group">
+                <label asp-for="NamaSumur"></label>
+                <input asp-for="NamaSumur" class="form-control" />
+                <span asp-validation-for="NamaSumur" class="text-danger"></span>
+            </div>
+
+            <!-- Daerah Sumur -->
+            <div class="form-group">
+                <label for="IdAreas">Daerah Sumur</label>
+                <select asp-for="IdAreas" class="form-control"
+                        asp-items="@(new SelectList(ViewData["Areas"] as List<InventoryManagement.Models.Areas>, "IdAreas", "NamaArea"))">
+                    <option value="">-- Pilih Area --</option>
+                </select>
+                <span asp-validation-for="IdAreas" class="text-danger"></span>
+            </div>
+
+            <!-- Tanggal Mulai -->
+            <div class="form-group">
+                <label asp-for="StartDate"></label>
+                <input asp-for="StartDate" class="form-control" type="date" />
+                <span asp-validation-for="StartDate" class="text-danger"></span>
             </div>
         </div>
+
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary">Simpan</button>
+            <a asp-action="Index" class="btn btn-secondary">Batal</a>
+        </div>
     </div>
-</div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

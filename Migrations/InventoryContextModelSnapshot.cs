@@ -22,6 +22,65 @@ namespace InventoryManagement.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
+            modelBuilder.Entity("InventoryManagement.Models.Areas", b =>
+                {
+                    b.Property<int>("IdAreas")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdAreas"));
+
+                    b.Property<string>("NamaArea")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("IdAreas");
+
+                    b.ToTable("Areas");
+                });
+
+            modelBuilder.Entity("InventoryManagement.Models.KeperluanHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("IdKeperluans")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IdSumur")
+                        .HasColumnType("int");
+
+                    b.Property<int>("JumlahKeluar")
+                        .HasColumnType("int");
+
+                    b.Property<string>("KodeMaterial")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<int?>("StockBarangIdBarang")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Tanggal")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdKeperluans");
+
+                    b.HasIndex("IdSumur");
+
+                    b.HasIndex("KodeMaterial");
+
+                    b.HasIndex("StockBarangIdBarang");
+
+                    b.ToTable("KeperluanHistories");
+                });
+
             modelBuilder.Entity("InventoryManagement.Models.KeperluanSumur", b =>
                 {
                     b.Property<int>("IdKeperluans")
@@ -51,13 +110,18 @@ namespace InventoryManagement.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
 
+                    b.Property<int?>("StockBarangIdBarang")
+                        .HasColumnType("int");
+
                     b.HasKey("IdKeperluans");
 
                     b.HasIndex("IdSumur");
 
                     b.HasIndex("KodeMaterial");
 
-                    b.ToTable("KeperluanSumurs", (string)null);
+                    b.HasIndex("StockBarangIdBarang");
+
+                    b.ToTable("KeperluanSumurs");
                 });
 
             modelBuilder.Entity("InventoryManagement.Models.StockBarang", b =>
@@ -79,9 +143,6 @@ namespace InventoryManagement.Migrations
                     b.Property<int>("HargaPerUnit")
                         .HasColumnType("int");
 
-                    b.Property<int>("Jumlah")
-                        .HasColumnType("int");
-
                     b.Property<string>("KodeGudang")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -92,7 +153,7 @@ namespace InventoryManagement.Migrations
 
                     b.HasKey("IdBarang");
 
-                    b.ToTable("StockBarangs", (string)null);
+                    b.ToTable("StockBarangs");
                 });
 
             modelBuilder.Entity("InventoryManagement.Models.StockHistory", b =>
@@ -116,6 +177,9 @@ namespace InventoryManagement.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(255)");
 
+                    b.Property<int?>("StockBarangIdBarang")
+                        .HasColumnType("int");
+
                     b.Property<int>("StokAwal")
                         .HasColumnType("int");
 
@@ -126,7 +190,9 @@ namespace InventoryManagement.Migrations
 
                     b.HasIndex("KodeMaterial");
 
-                    b.ToTable("StockHistories", (string)null);
+                    b.HasIndex("StockBarangIdBarang");
+
+                    b.ToTable("StockHistories");
                 });
 
             modelBuilder.Entity("InventoryManagement.Models.Sumur", b =>
@@ -137,20 +203,54 @@ namespace InventoryManagement.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdSumur"));
 
-                    b.Property<string>("DaerahSumur")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<int>("IdAreas")
+                        .HasColumnType("int");
 
                     b.Property<string>("NamaSumur")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("IdSumur");
 
-                    b.ToTable("Sumurs", (string)null);
+                    b.HasIndex("IdAreas");
+
+                    b.ToTable("Sumurs");
+                });
+
+            modelBuilder.Entity("InventoryManagement.Models.KeperluanHistory", b =>
+                {
+                    b.HasOne("InventoryManagement.Models.KeperluanSumur", "KeperluanSumur")
+                        .WithMany()
+                        .HasForeignKey("IdKeperluans")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InventoryManagement.Models.Sumur", "Sumur")
+                        .WithMany()
+                        .HasForeignKey("IdSumur")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InventoryManagement.Models.StockBarang", "StockBarang")
+                        .WithMany()
+                        .HasForeignKey("KodeMaterial")
+                        .HasPrincipalKey("KodeMaterial")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InventoryManagement.Models.StockBarang", null)
+                        .WithMany("KeperluanHistories")
+                        .HasForeignKey("StockBarangIdBarang");
+
+                    b.Navigation("KeperluanSumur");
+
+                    b.Navigation("StockBarang");
+
+                    b.Navigation("Sumur");
                 });
 
             modelBuilder.Entity("InventoryManagement.Models.KeperluanSumur", b =>
@@ -168,6 +268,10 @@ namespace InventoryManagement.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("InventoryManagement.Models.StockBarang", null)
+                        .WithMany("KeperluanSumurs")
+                        .HasForeignKey("StockBarangIdBarang");
+
                     b.Navigation("StockBarang");
 
                     b.Navigation("Sumur");
@@ -182,7 +286,36 @@ namespace InventoryManagement.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("InventoryManagement.Models.StockBarang", null)
+                        .WithMany("StockHistories")
+                        .HasForeignKey("StockBarangIdBarang");
+
                     b.Navigation("StockBarang");
+                });
+
+            modelBuilder.Entity("InventoryManagement.Models.Sumur", b =>
+                {
+                    b.HasOne("InventoryManagement.Models.Areas", "Area")
+                        .WithMany("Sumurs")
+                        .HasForeignKey("IdAreas")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Area");
+                });
+
+            modelBuilder.Entity("InventoryManagement.Models.Areas", b =>
+                {
+                    b.Navigation("Sumurs");
+                });
+
+            modelBuilder.Entity("InventoryManagement.Models.StockBarang", b =>
+                {
+                    b.Navigation("KeperluanHistories");
+
+                    b.Navigation("KeperluanSumurs");
+
+                    b.Navigation("StockHistories");
                 });
 
             modelBuilder.Entity("InventoryManagement.Models.Sumur", b =>
